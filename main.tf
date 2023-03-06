@@ -7,10 +7,10 @@ resource "aws_vpc" "main_vpc" {
 }
 
 resource "aws_subnet" "public_subnet" {
-  vpc_id                          = aws_vpc.main_vpc.id
-  cidr_block                      = "10.0.1.0/24"
-  map_public_ip_on_launch         = true
-  availability_zone               = "us-east-1b"
+  vpc_id                  = aws_vpc.main_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "us-east-1b"
 
   tags = {
     Name = "public-subnet"
@@ -43,27 +43,47 @@ resource "aws_route_table_association" "route_tbl_assoc_public" {
 }
 
 
- resource "aws_security_group" "sg" {
+resource "aws_security_group" "sg" {
   name        = "dev_sg"
   description = "dev security group"
   vpc_id      = aws_vpc.main_vpc.id
 
   ingress {
-    description      = "TLS from VPC"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "TLS from VPC"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
     Name = "open-sg"
   }
 }
+
+resource "aws_key_pair" "auth" {
+  key_name   = "id_rsa.pub"
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "aws_instance" "ecs_red" {
+  instance_type = "t2.micro"
+  ami           = data.aws_ami.server_ami.id
+
+  tags = {
+    Name = "red-ec2"
+  }
+
+  key_name               = aws_key_pair.auth.id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  subnet_id              = aws_subnet.public_subnet.id
+
+}
+
