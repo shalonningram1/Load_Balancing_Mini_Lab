@@ -94,4 +94,3 @@ resource "aws_instance" "ecs_red" {
   user_data              = file("userdata.tpl")
 
 }
-
