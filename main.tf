@@ -1,3 +1,13 @@
+resource "aws_s3_bucket" "s3" {
+  bucket = "site-files-shalonn"
+}
+
+resource "aws_s3_bucket_policy" "public_objects" {
+  bucket = "site-files-shalonn"
+  policy = data.aws_iam_policy_document.public_objects.json
+}
+
+
 resource "aws_vpc" "main_vpc" {
   cidr_block = "10.0.0.0/16"
 
@@ -43,10 +53,10 @@ resource "aws_route_table_association" "route_tbl_assoc_public" {
 }
 
 resource "aws_route" "internet_route" {
-    destination_cidr_block = "0.0.0.0/0"
-    route_table_id         = aws_route_table.aws_internet_route_table.id
-    gateway_id             = aws_internet_gateway.igw.id
-  
+  destination_cidr_block = "0.0.0.0/0"
+  route_table_id         = aws_route_table.aws_internet_route_table.id
+  gateway_id             = aws_internet_gateway.igw.id
+
 }
 
 
@@ -75,12 +85,12 @@ resource "aws_security_group" "sg" {
   }
 }
 
-# resource "aws_key_pair" "auth" {
-#   key_name   = "loadbalancer"
-#   public_key = file("loadbalancer.pem")
-# }
+#  resource "aws_key_pair" "auth" {
+#    key_name   = "shalonn"
+#    public_key = file("shalonn.pem")
+#}
 
-resource "aws_instance" "ecs_red" {
+resource "aws_instance" "ec2_red" {
   instance_type = "t2.micro"
   ami           = data.aws_ami.server_ami.id
 
@@ -88,9 +98,9 @@ resource "aws_instance" "ecs_red" {
     Name = "red-ec2"
   }
 
-  key_name               = "loadbalancer"
+  key_name               = "shalonn"
   vpc_security_group_ids = [aws_security_group.sg.id]
   subnet_id              = aws_subnet.public_subnet.id
-  user_data              = file("userdata.tpl")
+  user_data              = file("userdata.sh")
 
 }
