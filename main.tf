@@ -56,7 +56,6 @@ resource "aws_route" "internet_route" {
   destination_cidr_block = "0.0.0.0/0"
   route_table_id         = aws_route_table.aws_internet_route_table.id
   gateway_id             = aws_internet_gateway.igw.id
-
 }
 
 
@@ -102,5 +101,32 @@ resource "aws_instance" "ec2_red" {
   vpc_security_group_ids = [aws_security_group.sg.id]
   subnet_id              = aws_subnet.public_subnet.id
   user_data              = file("userdata.sh")
+}
 
+resource "aws_instance" "ec2_blue" {
+  instance_type = "t2.micro"
+  ami           = data.aws_ami.server_ami.id
+
+  tags = {
+    Name = "blue-ec2"
+  }
+
+  key_name               = "shalonn"
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  subnet_id              = aws_subnet.public_subnet.id
+  user_data              = file("userdata.sh")
+}
+
+resource "aws_instance" "ec2_white" {
+  instance_type = "t2.micro"
+  ami           = data.aws_ami.server_ami.id
+
+  tags = {
+    Name = "white-ec2"
+  }
+
+  key_name               = "shalonn"
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  subnet_id              = aws_subnet.public_subnet.id
+  user_data              = file("userdata.sh")
 }
